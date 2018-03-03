@@ -1,0 +1,52 @@
+{
+	"tabsInfo": [
+		{
+			"title": "欢迎使用",
+			"navIndex": "100",
+			"viewsUrl": "/home/mainPage",
+			"content": ""
+		}, { 
+			"title": "题目管理",
+			"navIndex": "1",
+			"item": [
+				{
+					"title": "编辑发布",
+					"navIndex": "11",
+					"viewsUrl": "/home/subject",
+					"content": ""
+				}, {
+					"title": "查看选题",
+					"navIndex": "12",
+					"viewsUrl": "/home/selectedTopic",
+					"content": ""
+				}
+			]
+		},{
+			"title": "毕设管理",
+			"navIndex": "2",
+			"viewsUrl": "/home/graduationManagement",
+			"content": ""
+		}, { 
+			"title": "文档管理",
+			"navIndex": "3",
+			"item": [
+				{
+					"title": "开题报告",
+					"navIndex": "31",
+					"viewsUrl": "/home/openingReport",
+					"content": ""
+				}, {
+					"title": "毕业论文",
+					"navIndex": "32",
+					"viewsUrl": "/home/graduation",
+					"content": ""
+				}
+			]
+		},{
+			"title": "公告管理",
+			"navIndex": "4",
+			"viewsUrl": "/home/announcement",
+			"content": ""
+		}
+	]
+}

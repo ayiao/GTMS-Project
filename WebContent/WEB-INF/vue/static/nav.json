@@ -1,0 +1,47 @@
+{
+	"menu": [
+		{
+			"icon":"el-icon-date",
+			"menuid":"1",
+			"menuname":"题目管理",
+			"menus":[{
+				"icon":"el-icon-setting",
+				"menuid":"11",
+				"menuname":"编辑发布",
+				"url":"/home/subject"
+			},{
+				"icon":"el-icon-setting",
+				"menuid":"12",
+				"menuname":"查看选题",
+				"url":"/home/selectedTopic"
+			}]
+		
+	},{
+			"icon":"el-icon-bell",
+			"menuid":"2",
+			"menuname":"毕设管理",
+			"url":"/home/graduationManagement"
+	},{
+			"icon":"el-icon-menu",
+			"menuid":"3",
+			"menuname":"文档管理",
+			"menus":[{
+				"icon":"el-icon-setting",
+				"menuid":"31",
+				"menuname":"开题报告",
+				"url":"/home/openingReport"
+			},{
+				"icon":"el-icon-setting",
+				"menuid":"32",
+				"menuname":"毕业论文",
+				"url":"/home/graduation"
+			}]
+		
+	},{
+			"icon":"el-icon-news",
+			"menuid":"4",
+			"menuname":"公告管理",
+			"url":"/home/announcement"
+	}
+	]
+}
