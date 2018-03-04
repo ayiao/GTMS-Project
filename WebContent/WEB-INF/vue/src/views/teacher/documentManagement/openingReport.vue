@@ -1,30 +1,22 @@
 <template>
 	<div class="box">
-		<div id="left">
-			<el-upload class="upload-demo" :auto-upload="flase" drag :action="importFileUrl" :data="upLoadData" :before-upload="beforeUpload" multiple>
-				<i class="el-icon-upload"></i>
-				<div class="el-upload__text">将开题报告文件拖到此处，或<em>点击上传</em></div>
-				<div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-			</el-upload>
-			<!--<el-button type="primary" @click="newSubmitForm()" class="yes-btn">
-				确 定
-			</el-button>-->
+		<div class="top">
+			<div class="button">
+				<el-upload class="upload-demo" ref="upload" action="https://jsonplaceholder.typicode.com/posts/" :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" :auto-upload="false">
+					<el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+					<el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到学院老师</el-button>
+				</el-upload>
+			</div>
 		</div>
-		<div id="right">
+		<div class="block">
 			<el-table :data="openingDate" size="small" height="510" border style="width: 100%">
 				<el-table-column type="index" fixed width="55" prop="id" align="center">
 				</el-table-column>
-				<el-table-column prop="date" label="日期" width="120" align="center">
+				<el-table-column prop="date" label="上传时间" align="center">
 				</el-table-column>
-				<el-table-column prop="name" label="姓名" align="center">
+				<el-table-column prop="address" label="开题报告" width="200" align="center">
 				</el-table-column>
-				<el-table-column prop="province" label="省份" align="center">
-				</el-table-column>
-				<el-table-column prop="city" label="城市" align="center">
-				</el-table-column>
-				<el-table-column prop="address" label="地址" align="center" width="260">
-				</el-table-column>
-				<el-table-column prop="zip" label="邮编" align="center">
+				<el-table-column prop="name" label="上传人" align="center">
 				</el-table-column>
 				<el-table-column fixed="right" label="操作" width="100">
 					<template slot-scope="scope">
@@ -34,6 +26,22 @@
 				</el-table-column>
 			</el-table>
 		</div>
+		<el-dialog title="发送开题报告" :visible.sync="show.submit" size="mini" :close-on-click-modal="false">
+			<el-form :model="submitTo" ref="submitForm">
+				<el-form-item label="院系导师：" prop="teacher" label-width="120px">
+					<el-select v-model="submitTo.teacher" clearable placeholder="请选择发送院系导师">
+						<el-option label="信息科学技术学院" :value="1">
+						</el-option>
+						<el-option label="西方语言学院" :value="2">
+						</el-option>
+					</el-select>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer" style="text-align: center; margin-top: -35px;">
+				<el-button type="primary" @click="submitTo('submitForm')">确 定</el-button>
+				<el-button @click="show.submit= false">取 消</el-button>
+			</div>
+		</el-dialog>
 	</div>
 </template>
 
@@ -43,11 +51,13 @@
 		data() {
 			return {
 				openingDate: [],
-				/*importFileUrl: "https://jsonplaceholder.typicode.com/posts/",*/
-				upLoadData: {
-					userId: '要传递的用户信息参数'
-				}
-			}
+				show: {
+					submit: false,
+				},
+				submitTo: {
+					teacher: '',
+				},
+			};
 		},
 		created: function() {
 			axios.get('http://localhost:8080/static/opening.json').then((res) => {
@@ -57,29 +67,56 @@
 			});
 		},
 		computed: {
-			
+
 		},
 		methods: {
-			newVideo(data) {
-				debugger;
-				return axios({
-					method: 'post',
-					url: 'https://jsonplaceholder.typicode.com/posts/',
-					timeout: 20000,
-					data: data
-				})
+			submitUpload() {
+				this.show.submit = true;
 			},
-			beforeUpload(file) {
-				console.log("file="+file);
-				let fd = new FormData();
-				fd.append('file', file);
-				fd.append('groupId', this.groupId);
-				debugger;
-				this.$options.methods.newVideo(fd);
-				return true;
+			handleRemove(file, fileList) {
+				console.log(file, fileList);
 			},
-			newSubmitForm() {
-				this.$refs.newupload.submit()
+			handlePreview(file) {
+				console.log(file);
+			},
+			submitTo(formName) {
+				debugger;
+				this.$refs[formName].validate((valid) => {
+					if(valid) {
+						this.$refs.upload.submit();
+						addUserGroup({
+							id: this.selectItemId,
+							teacher: this.submitTo.teacher,
+						}).then((res) => {
+							if(res.data.code == 1) {
+								this.$message({
+									showClose: true,
+									message: '录入成功！',
+									type: 'success'
+								});
+								getUserGroupList({
+									rows: '30',
+									userGroupName: this.subjectSearch
+								}).then((res) => {
+									this.girdData = res.data.rows;
+									this.totalItems = res.data.total;
+									this.currentPageSize = 30;
+									this.currentPage = 1;
+									this.temp.status="审核中";
+								});
+							} else {
+								this.$message({
+									showClose: true,
+									message: '录入失败！',
+									type: 'error'
+								});
+							}
+						});
+						this.show.add = false;
+					} else {
+						return false;
+					}
+				});
 			},
 
 			downLoad(row) {
@@ -87,64 +124,65 @@
 
 			},
 			deleteRow(index, row) {
-				   this.$confirm('您确定要删除吗？', '提示', {
-                    type: 'warning'
-                }).then(() => {
-                    delUserGroup({id:row.id}).then((res) => {
-                    if(res.data.code==1){
-                    this.$message({
-                        showClose: true,
-                        message: '删除成功！',
-                        type: 'success'
-                    });
-                    getUserGroupList({rows:'30',userGroupName:this.groupSearch}).then((res) => {
-                        this.girdData=res.data.rows;
-                    this.totalItems=res.data.total;
-                    this.currentPage=1;
-                    this.currentPageSize=30;
-                });
-                }else{
-                    this.$message({
-                        showClose: true,
-                        message: res.data.message,
-                        type: 'error'
-                    });
-                }
-            });
-            }).catch(() => {
-                    this.$message({
-                    type: 'info',
-                    message: '已取消删除'
-                });
-            });
+				this.$confirm('您确定要删除吗？', '提示', {
+					type: 'warning'
+				}).then(() => {
+					delUserGroup({
+						id: row.id
+					}).then((res) => {
+						if(res.data.code == 1) {
+							this.$message({
+								showClose: true,
+								message: '删除成功！',
+								type: 'success'
+							});
+							getUserGroupList({
+								rows: '30',
+								userGroupName: this.groupSearch
+							}).then((res) => {
+								this.girdData = res.data.rows;
+								this.totalItems = res.data.total;
+								this.currentPage = 1;
+								this.currentPageSize = 30;
+							});
+						} else {
+							this.$message({
+								showClose: true,
+								message: res.data.message,
+								type: 'error'
+							});
+						}
+					});
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
 			}
 		},
-		
+
 	}
 </script>
 
 <style>
 	.box {
+		height: 100%;
+	}
+	
+	.top {
+		width: 100%;
 		position: relative;
-		height: 100%;
+		height: 80px;
 	}
 	
-	#left {
-		width: 40%;
-		float: left;
-		height: 100%;
-	}
-	
-	#right {
-		width: 60%;
-		float: right;
-		height: 100%;
-	}
-	
-	.upload-demo {
+	.button {
 		position: absolute;
-		top: 50%;
-		left: 4%;
-		margin-top: -90px;
+		left: 10px;
+		line-height: 40px;
+	}
+	
+	.el-select {
+		width: 100% !important;
 	}
 </style>

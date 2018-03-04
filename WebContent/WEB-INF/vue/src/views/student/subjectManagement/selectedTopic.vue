@@ -2,8 +2,8 @@
 	<div class="box">
 		<div class="top">
 			<div class="button">
-				<el-button type="text" icon="el-icon-check" size="small " @click="pass">通过</el-button>
-				<el-button type="text" icon="el-icon-close" size="small " @click="noPass">不通过</el-button>
+				<el-button type="text" icon="el-icon-plus" size="small " @click="pass">通过</el-button>
+				<el-button type="text" icon="el-icon-edit" size="small " @click="noPass">不通过</el-button>
 				<el-button type="text" icon="el-icon-refresh" size="small" @click="refresh">刷新</el-button>
 			</div>
 			<el-form class="searchForm" :inline="true">
