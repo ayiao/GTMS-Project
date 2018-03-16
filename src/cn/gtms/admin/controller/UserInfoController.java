@@ -27,6 +27,7 @@ import cn.gtms.admin.entity.SysRoleMenu;
 import cn.gtms.admin.entity.UserInfo;
 import cn.gtms.admin.service.AdminUserService;
 import cn.gtms.admin.service.SysRoleMenuService;
+import cn.gtms.util.ListUtils;
 
 @RestController
 @RequestMapping(value = "/api/user")
@@ -61,20 +62,15 @@ public class UserInfoController {
 			List<RoleMenuExt> menus=new ArrayList<>();
 			Map<String,Object> parameter=new HashMap<>();
 			parameter.put("eq_role_id", adminUser.getRole());
-			parameter.put("pageSize", "1000000");
-			parameter.put("pageNo", "1");
-			parameter.put("order", "asc");
-			parameter.put("sort", "sort");
-			List<SysRoleMenu> sysRoleMenus=new ArrayList<>();
-			Page<SysRoleMenu> page=sysRoleMenuService.find(
-					WebUtils.<SysRoleMenu> page(parameter, response),
-					SearchCriteria.toList(parameter));
-			if(page.getRows()!=null){
-				sysRoleMenus.addAll(page.getRows());
-			}
+//			parameter.put("pageSize", "1000000");
+//			parameter.put("pageNo", "1");
+//			parameter.put("order", "asc");
+//			parameter.put("sort", "sort");
+			List<SysRoleMenu> sysRoleMenus=sysRoleMenuService.find(SearchCriteria.toList(parameter));
+			ListUtils.sort(sysRoleMenus, true, "sort");
 			for(SysRoleMenu sysRoleMenu:sysRoleMenus){
 				if("1".equals(sysRoleMenu.getMenuLevel())){
-					menus.add((RoleMenuExt)sysRoleMenu);
+					menus.add(JSON.parseObject(JSON.toJSONString(sysRoleMenu), RoleMenuExt.class)) ;
 				}
 			}
 			for(RoleMenuExt menu:menus){

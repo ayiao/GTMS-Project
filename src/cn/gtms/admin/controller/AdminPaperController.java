@@ -1,5 +1,6 @@
 package cn.gtms.admin.controller;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,8 +20,9 @@ import cn.gtms.admin.service.AdminPaperService;
  */
  
 @RestController
+@CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping(value = "/api/admin/adminpaper")
 public class AdminPaperController extends
 		CURDController<AdminPaper,AdminPaperService> {
-
+	
 }
