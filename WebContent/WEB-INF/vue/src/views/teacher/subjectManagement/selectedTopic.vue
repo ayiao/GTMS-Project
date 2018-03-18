@@ -147,7 +147,7 @@
 	.top {
 		width: 100%;
 		position: relative;
-		height: 40px;
+		height: 40px ;
 	}
 	
 	.searchForm {

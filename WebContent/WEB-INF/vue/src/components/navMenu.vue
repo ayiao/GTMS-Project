@@ -2,13 +2,13 @@
 	<el-menu default-active="activeIndex" class="el-menu-vertical-demo" background-color="#293c55" text-color="#fff" active-text-color="#ffd04b">
 		<el-menu-item-group>
 			<el-menu-item index="100" @click="homeClick"><i class="el-icon-star-off"></i>首页</el-menu-item>
-			<div v-for="(data,dataindex) in menus" v-if="!data.menus">
-				<el-menu-item :index="dataindex.toString()" @click="noChildClick(dataindex,data.menuname,data.url)"><i :class="data.icon"></i>{{data.menuname}}</el-menu-item>
+			<div v-for="(data,dataindex) in menus" v-if="data.menus.length==0">
+				<el-menu-item :index="dataindex.toString()" @click="noChildClick(dataindex,data.menuName,data.menuUrl)"><i :class="data.icon"></i>{{data.menuName}}</el-menu-item>
 			</div>
 			<div v-else>
 				<el-submenu :index="dataindex.toString()" :key="data.menuid">
-					<template slot="title"><i :class="data.icon"></i>{{data.menuname}}</template>
-					<el-menu-item :index="dataindex + '-' + childindex" v-for="(children,childindex) in data.menus" :key="children.menuid" @click="manageClick(dataindex,childindex,children.menuname,children.url)">{{children.menuname}}</el-menu-item>
+					<template slot="title"><i :class="data.icon"></i>{{data.menuName}}</template>
+					<el-menu-item :index="dataindex + '-' + childindex" v-for="(children,childindex) in data.menus" :key="children.menuid" @click="manageClick(dataindex,childindex,children.menuName,children.menuUrl)">{{children.menuName}}</el-menu-item>
 				</el-submenu>
 			</div>
 
@@ -98,10 +98,11 @@
 				};
 				this.$store.commit('addTabs', obj);
 			},
-			noChildClick(dataindex, menuname, url) {
+			noChildClick(dataindex, menuName, url) {
+				debugger;
 				this.activeIndex = dataindex;
 				let obj = {
-					title: menuname,
+					title: menuName,
 					navIndex: this.activeIndex,
 					viewsUrl: url,
 					content: ''
@@ -119,18 +120,52 @@
 				this.$store.commit('addTabs', obj);
 			},
 			menuList() {
-				axios.get(this.getBaseURL()+ '/static/nav.json').then((res) => {
-					/*将data.menu数据赋值给result*/
-					var result = res.data.menu
-					this.menus = result;
-					console.log(result)
-				});
-				axios.get( this.getBaseURL()+ '/static/tabInfo.json').then((res) => {
-					/*将data.tabsInfo数据赋值给result*/
-					var result = res.data.tabsInfo
-					this.tabsInfo = result;
-					console.log(result)
-				});
+				
+				JSON.stringify(this.$route.params)	;
+				debugger;
+				this.menus=[];
+				this.tabsInfo=[];
+				
+				var menuList=this.$route.params.output.roleMenuExts;
+				for(var i=0;i<menuList.length;i++){
+					var menuData=menuList[i];
+					var menu={
+						icon:menuData.menuIcon,
+						menuid:menuData.roleMenuId,
+						menuName:menuData.menuName,
+						menuUrl:menuData.menuUrl
+					}
+					var tabsInfoData={
+						title:menuData.menuName,
+						navIndex:menuData.roleMenuId,
+						viewsUrl:menuData.menuUrl
+					}
+					var subMenuList=menuData.subRoleMenus;
+					var subMenus=[];
+					var subTabsInfos=[];
+					if(subMenuList){
+						for(var j=0;j<subMenuList.length;j++){
+							var subMenuData=subMenuList[j];
+							var subMenu={
+								icon:subMenuData.menuIcon,
+								menuid:subMenuData.roleMenuId,
+								menuName:subMenuData.menuName,
+								menuUrl:subMenuData.menuUrl
+							}
+							var subTabsInfo={
+								title:subMenuData.menuName,
+								navIndex:subMenuData.roleMenuId,
+								viewsUrl:subMenuData.menuUrl
+							}
+							subMenus.push(subMenu);
+							subTabsInfos.push(subTabsInfo);
+						}
+					}
+					menu['menus']=subMenus;
+					this.menus.push(menu);
+					tabsInfoData['item']=subTabsInfos;
+					this.tabsInfo.push(tabsInfoData);
+				}
 			},
 
 		},

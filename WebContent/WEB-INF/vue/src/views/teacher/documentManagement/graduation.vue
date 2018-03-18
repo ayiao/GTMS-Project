@@ -165,7 +165,7 @@
 	}
 </script>
 
-<style>
+<style scoped="scoped">
 	.box {
 		height: 100%;
 	}

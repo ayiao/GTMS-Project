@@ -88,12 +88,12 @@
 					};
 					this.GLOBAL_Http(this.$http, "/GTMS/api/user/login?", 'GET', param, function(data) {
 						_this.$router.push({
-							path: '/home'
+							name: 'home',
+							params:data
 						});
 
 						alert('登录成功');
 					}, function(data) {
-						debugger;
 						alert(data.message);
 					});
 

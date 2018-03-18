@@ -119,7 +119,7 @@
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer" style="text-align: center; margin-top: -35px;">
-				<el-button type="primary" @click="submitTo('submitForm')">确 定</el-button>
+				<el-button type="primary" @click="confirSubmit('submitForm')">确 定</el-button>
 				<el-button @click="show.submit= false">取 消</el-button>
 			</div>
 		</el-dialog>
@@ -135,7 +135,7 @@
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer" style="text-align: center; margin-top: -35px;">
-				<el-button type="primary" @click="publishTo('publishForm')">确 定</el-button>
+				<el-button type="primary" @click="confirPublish('publishForm')">确 定</el-button>
 				<el-button @click="show.publish= false">取 消</el-button>
 			</div>
 		</el-dialog>
@@ -144,6 +144,7 @@
 
 <script>
 	import axios from 'axios'
+	import {addSubjectInfo} from '../../../../api/api.js'
 	export default {
 		data() {
 			return {
@@ -213,6 +214,10 @@
 			}
 		},
 		created: function() {
+			 /*getUserGroupList({rows:'30'}).then((res) => {
+                this.girdData=res.data.rows;
+                this.totalItems=res.data.total;
+            });*/
 			axios.get('http://localhost:8080/static/tableData3.json').then((res) => {
 				this.tableData3 = res.data.tableData3;
 			});
@@ -274,14 +279,14 @@
 			confirmAdd(formName) {
 				this.$refs[formName].validate((valid) => {
 					if(valid) {
-						addUserGroup({
-							title: this.subjectAdd.title,
-							teacher: this.subjectAdd.teacher,
-							details: this.subjectAdd.details,
-							type: this.subjectAdd.type,
-							num: this.subjectAdd.num,
+						addSubjectInfo({
+							paperTitle: this.subjectAdd.title,
+							createBy: this.subjectAdd.teacher,
+							paperDescribtion: this.subjectAdd.details,
+							paperType: this.subjectAdd.type,
+							limitAccount: this.subjectAdd.num,
 						}).then((res) => {
-							if(res.data.code == 1) {
+							if(res.data.status == 0) {
 								this.$message({
 									showClose: true,
 									message: '录入成功！',
@@ -341,13 +346,13 @@
 					if(valid) {
 						editUserGroup({
 							id: this.selectItemId,
-							title: this.subjectEdit.title,
-							teacher: this.subjectEdit.teacher,
-							details: this.subjectEdit.details,
-							type: this.subjectEdit.type,
-							num: this.subjectEdit.num,
+							paperTitle: this.subjectEdit.title,
+							createBy: this.subjectEdit.teacher,
+							paperDescribtion: this.subjectEdit.details,
+							paperType: this.subjectEdit.type,
+							limitAccount: this.subjectEdit.num,
 						}).then((res) => {
-							if(res.data.code == 1) {
+							if(res.data.status == 1) {
 								this.$message({
 									showClose: true,
 									message: '编辑成功！',
@@ -472,14 +477,14 @@
 					});
 				}
 			},
-			submitTo(formName) {
+			confirSubmit(formName) {
 				this.$refs[formName].validate((valid) => {
 					if(valid) {
 						addUserGroup({
 							id: this.selectItemId,
-							teacher: this.submitTo.teacher,
+							createBy: this.submitTo.teacher,
 						}).then((res) => {
-							if(res.data.code == 1) {
+							if(res.data.status == 0) {
 								this.$message({
 									showClose: true,
 									message: '录入成功！',
@@ -526,14 +531,14 @@
 					});
 				}
 			},
-			publishTo(formName){
+			confirPublish(formName){
 				this.$refs[formName].validate((valid) => {
 					if(valid) {
 						addUserGroup({
 							id: this.selectItemId,
-							teacher: this.publishTo.teacher,
+							createBy: this.publishTo.teacher,
 						}).then((res) => {
-							if(res.data.code == 1) {
+							if(res.data.status == 0) {
 								this.$message({
 									showClose: true,
 									message: '录入成功！',
@@ -574,7 +579,7 @@
 	}
 </script>
 
-<style>
+<style scoped="scoped">
 	.box {
 		height: inherit;
 		width: inherit;
@@ -583,7 +588,7 @@
 	.top {
 		width: 100%;
 		position: relative;
-		height: 40px;
+		height: 40px !important;
 	}
 	
 	.searchForm {

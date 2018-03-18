@@ -28,7 +28,7 @@ new Vue({
 
 
 Vue.prototype.getBaseURL=function(){
-	return 'http://localhost:8081';
+	return 'http://192.168.16.103:8080';
 }
 
 Vue.prototype.GLOBAL_Http = function($http, url, method, data, successCallBack, errorCallBack) {
@@ -39,6 +39,7 @@ Vue.prototype.GLOBAL_Http = function($http, url, method, data, successCallBack, 
 			url: myUrl,
 			data: data,
 			async: false,
+			crossDomain:true,
 			dataType:'json'
 		})
 		.success(function(data, status, headers, config) {
