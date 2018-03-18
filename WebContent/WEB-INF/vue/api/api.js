@@ -5,7 +5,9 @@ import store from '../vuex/index.js'
 import qs from 'qs'
 
 axios.defaults.timeout = 60000;//响应时间
-axios.defaults.headers.post['Content-Type'] = 'Access-Control-Allow-Origin; charset=UTF-8';//配置请求头
+axios.defaults.headers.post['Content-Type'] = 'application/json; charset=UTF-8';//配置请求头
+axios.defaults.headers.post['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqd3QiLCJpYXQiOjE1MjEzMzc0OTYsInN1YiI6IntcInJvbGVpZFwiOlwiLFwiLFwidXNlcmlkXCI6MzEsXCJwbGF0Zm9ybVwiOlwiMSwyLDMsNVwiLFwidXNlcm5hbWVcIjpcIkJWTjAwMVwifSIsImV4cCI6MTUyMjIwMTQ5Nn0.-6husDsi6dRRwxINkS_GUwgp54HcvMN_IXENbLdBcew';//配置请求头
+axios.defaults.headers.post['Accept-Language'] = 'en-US';//配置请求头
 axios.defaults.baseURL = process.env.NODE_ENV === 'production'?'':'/apiurl';
 //POST传参序列化(添加请求拦截器)
 axios.interceptors.request.use(
@@ -192,4 +194,4 @@ const catchError = error => {
 
 }
 //导师新增论文题目接口
-export const addSubjectInfo = params => {return axios.post(`${base}/api/admin/adminpaperext/save_paper`,params).catch((error) => {catchError(error)});};
+export const addSubjectInfo = params => {return axios.post(`${base}/api/admin/adminpaperext/create`,params).catch((error) => {catchError(error)});};

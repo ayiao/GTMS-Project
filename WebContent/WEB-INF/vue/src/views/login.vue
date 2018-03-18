@@ -86,7 +86,7 @@
 						account: this.ruleForm.name,
 						password: this.ruleForm.password
 					};
-					this.GLOBAL_Http(this.$http, "/GTMS/api/user/login?", 'GET', param, function(data) {
+					this.GLOBAL_Http(this.$http, "/api/user/login?", 'GET', param, function(data) {
 						_this.$router.push({
 							name: 'home',
 							params:data

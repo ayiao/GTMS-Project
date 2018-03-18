@@ -35,6 +35,11 @@ Vue.prototype.GLOBAL_Http = function($http, url, method, data, successCallBack, 
 	var myUrl = "";
 	myUrl = this.getBaseURL() + url;
 	return $.ajax({
+			headers:{
+				'Authorization':'Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqd3QiLCJpYXQiOjE1MjEzMzc0OTYsInN1YiI6IntcInJvbGVpZFwiOlwiLFwiLFwidXNlcmlkXCI6MzEsXCJwbGF0Zm9ybVwiOlwiMSwyLDMsNVwiLFwidXNlcm5hbWVcIjpcIkJWTjAwMVwifSIsImV4cCI6MTUyMjIwMTQ5Nn0.-6husDsi6dRRwxINkS_GUwgp54HcvMN_IXENbLdBcew',
+				'Accept-Language':'en-US',
+				'Content-Type':'application/json; charset=UTF-8'
+			},
 			method: method,
 			url: myUrl,
 			data: data,
