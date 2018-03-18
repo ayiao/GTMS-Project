@@ -17,11 +17,7 @@ http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd"
 	<!-- 编码过滤器 -->
 	<filter>
 		<filter-name>CorsFilter</filter-name>
-		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
-	</filter>
-	<filter>
-		<filter-name>myCorsFilter</filter-name>
-		<filter-class>cn.gtms.config.myCORSFilter</filter-class>
+		<filter-class>cn.gtms.config.CorsFilter</filter-class>
 	</filter>
 	<filter>
 		<filter-name>encodingFilter</filter-name>
@@ -34,10 +30,6 @@ http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd"
 	</filter>
 	<filter-mapping>
 		<filter-name>CorsFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>myCorsFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 	<filter-mapping>

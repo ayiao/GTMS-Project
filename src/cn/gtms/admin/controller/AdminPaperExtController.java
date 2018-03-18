@@ -47,6 +47,7 @@ public class AdminPaperExtController {
 		adminPaperService.save(adminPaper);
 		baseResponse.setStatus(Constants.STATUS.SUCCESS);
 		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Headers", "*");
 		return ResponseEntity.ok(JSON.toJSONString(baseResponse, SerializerFeature.DisableCircularReferenceDetect));
 	}
 	
@@ -59,6 +60,7 @@ public class AdminPaperExtController {
 		adminPaperService.update(adminPaper);
 		baseResponse.setStatus(Constants.STATUS.SUCCESS);
 		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Headers", "*");
 		return ResponseEntity.ok(JSON.toJSONString(baseResponse, SerializerFeature.DisableCircularReferenceDetect));
 	}
 	
@@ -69,6 +71,7 @@ public class AdminPaperExtController {
 		baseResponse.setOutput(adminPaperService.find(SearchCriteria.toList(parameter)));
 		baseResponse.setStatus(Constants.STATUS.SUCCESS);
 		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Headers", "*");
 		return ResponseEntity.ok(JSON.toJSONString(baseResponse, SerializerFeature.DisableCircularReferenceDetect));
 	}
 	
@@ -80,6 +83,7 @@ public class AdminPaperExtController {
 		adminPaperService.removeAll(ids);
 		baseResponse.setStatus(Constants.STATUS.SUCCESS);
 		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Headers", "*");
 		return ResponseEntity.ok(JSON.toJSONString(baseResponse, SerializerFeature.DisableCircularReferenceDetect));
 	}
 }
