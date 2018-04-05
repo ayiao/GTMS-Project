@@ -26,6 +26,8 @@
 					</template>
 				</el-table-column>
 			</el-table>
+			<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[20, 30, 40]" :page-size="100" layout="total, sizes, prev, pager, next, jumper" :total="totalItems">
+			</el-pagination>
 		</div>
 	</div>
 </template>
@@ -64,6 +66,27 @@
 
 		},
 		methods: {
+			handleSizeChange(size) {
+				this.currentPage = 1;
+				findReport({
+					pageNo: size,
+					page: this.currentPage,
+				}).then((res) => {
+					this.girdData = res.data.output.data;
+					this.currentPageSize = size;
+					this.totalItems = res.data.output.total;
+				});
+			},
+			handleCurrentChange(currentPage) {
+				findReport({
+					pageNo: this.currentPageSize,
+					page: currentPage,
+				}).then((res) => {
+					this.girdData = res.data.output.data;
+					this.currentPage = currentPage;
+					this.totalItems = res.data.output.total;
+				});
+			},
 			export_path(data, url) {
 				var array = new Array();
 				for(var a in data) {

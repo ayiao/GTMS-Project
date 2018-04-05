@@ -1,154 +1,190 @@
 <template>
 	<div class="box">
-		<div class="top">
-			<div class="button">
-				<el-upload class="upload-demo" ref="upload" action="https://jsonplaceholder.typicode.com/posts/" :on-preview="handlePreview" :on-remove="handleRemove" :file-list="fileList" :auto-upload="false">
-					<el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-					<el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到学院老师</el-button>
-				</el-upload>
-			</div>
-		</div>
 		<div class="block">
-			<el-table :data="openingDate" size="small" height="510" border style="width: 100%">
-				<el-table-column type="index" fixed width="55" prop="id" align="center">
+			<el-table :data="girdData" size="small" height="510" border style="width: 100%">
+				<el-table-column type="index" fixed width="55" prop="documentIdExt" align="center">
 				</el-table-column>
-				<el-table-column prop="date" label="上传时间" align="center">
+				<el-table-column prop="paperTitle" label="论文题目" align="center">
 				</el-table-column>
-				<el-table-column prop="address" label="开题报告" width="200" align="center">
+				<el-table-column prop="createByName" label="上传人" align="center">
 				</el-table-column>
-				<el-table-column prop="name" label="上传人" align="center">
+				<el-table-column prop="documentName" label="文件名" width="200" align="center">
+				</el-table-column>
+				<el-table-column prop="utcCreate" label="上传时间" align="center">
+				</el-table-column>
+				<el-table-column prop="documentType" label="文件类型" align="center">
+				</el-table-column>
+				<el-table-column prop="documentStatus" label="状态" align="center">
 				</el-table-column>
 				<el-table-column fixed="right" label="操作" width="100">
 					<template slot-scope="scope">
+						<el-upload :action="importFileUrl" name="file" :headers="uploadHeaders" :data="upLoadData(scope.row)" :onError="uploadError" :onSuccess="uploadSuccess">
+							<el-button slot="trigger" size="small" type="text">上传</el-button>
+						</el-upload>
 						<el-button @click="downLoad(scope.row)" type="text" size="small">下载</el-button>
 						<el-button type="text" size="small" @click="deleteRow(scope.$index, scope.row)">删除</el-button>
 					</template>
 				</el-table-column>
 			</el-table>
+			<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[20, 30, 40]" :page-size="100" layout="total, sizes, prev, pager, next, jumper" :total="totalItems">
+			</el-pagination>
 		</div>
-		<el-dialog title="发送开题报告" :visible.sync="show.submit" size="mini" :close-on-click-modal="false">
-			<el-form :model="submitTo" ref="submitForm">
-				<el-form-item label="院系导师：" prop="teacher" label-width="120px">
-					<el-select v-model="submitTo.teacher" clearable placeholder="请选择发送院系导师">
-						<el-option label="信息科学技术学院" :value="1">
-						</el-option>
-						<el-option label="西方语言学院" :value="2">
-						</el-option>
-					</el-select>
-				</el-form-item>
-			</el-form>
-			<div slot="footer" class="dialog-footer" style="text-align: center; margin-top: -35px;">
-				<el-button type="primary" @click="submitTo('submitForm')">确 定</el-button>
-				<el-button @click="show.submit= false">取 消</el-button>
-			</div>
-		</el-dialog>
 	</div>
 </template>
 
 <script>
 	import axios from 'axios'
+	import { findReport, deleteDocument } from '../../../../api/api.js'
 	export default {
 		data() {
 			return {
-				openingDate: [],
-				show: {
-					submit: false,
-				},
-				submitTo: {
-					teacher: '',
+				girdData: [],
+				importFileUrl: this.getBaseURL() + '/api/admin/admindocumentext/upload_document',
+				uploadHeaders: {
+					'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqd3QiLCJpYXQiOjE1MjIyNDU2OTQsInN1YiI6IntcInJvbGVpZFwiOlwiLCwsLCxcIixcInVzZXJpZFwiOjMxLFwicGxhdGZvcm1cIjpcIjEsMiw1LDlcIixcInVzZXJuYW1lXCI6XCJCVk4wMDFcIn0iLCJleHAiOjE1MjMxMDk2OTR9.ChE_a5sJxmRGHo6rcEJl181kyS0tV9u9Y9051mbi_M0',
+					'Accept-Language': 'en-US'
 				},
 			};
 		},
 		created: function() {
-			axios.get('http://localhost:8080/static/opening.json').then((res) => {
-				var result = res.data.openingDate
+			/*axios.get('http://localhost:8080/static/opening.json').then((res) => {
+				var result = res.data.openingDate;
 				this.openingDate = result;
 				console.log(result);
+			});*/
+			findReport({
+				userId: getUserInfo().userId,
+				pageNo: '1',
+				pageSize: '30'
+			}).then((res) => {
+				console.log(res);
+				this.girdData = res.data.output.data;
+				this.totalItems = res.data.output.total;
 			});
 		},
 		computed: {
 
 		},
 		methods: {
-			submitUpload() {
-				this.show.submit = true;
-			},
-			handleRemove(file, fileList) {
-				console.log(file, fileList);
-			},
-			handlePreview(file) {
-				console.log(file);
-			},
-			submitTo(formName) {
-				debugger;
-				this.$refs[formName].validate((valid) => {
-					if(valid) {
-						this.$refs.upload.submit();
-						addUserGroup({
-							id: this.selectItemId,
-							teacher: this.submitTo.teacher,
-						}).then((res) => {
-							if(res.data.code == 1) {
-								this.$message({
-									showClose: true,
-									message: '录入成功！',
-									type: 'success'
-								});
-								getUserGroupList({
-									rows: '30',
-									userGroupName: this.subjectSearch
-								}).then((res) => {
-									this.girdData = res.data.rows;
-									this.totalItems = res.data.total;
-									this.currentPageSize = 30;
-									this.currentPage = 1;
-									this.temp.status="审核中";
-								});
-							} else {
-								this.$message({
-									showClose: true,
-									message: '录入失败！',
-									type: 'error'
-								});
-							}
-						});
-						this.show.add = false;
-					} else {
-						return false;
-					}
+			handleSizeChange(size) {
+				this.currentPage = 1;
+				findReport({
+					pageNo: size,
+					page: this.currentPage,
+				}).then((res) => {
+					this.girdData = res.data.output.data;
+					this.currentPageSize = size;
+					this.totalItems = res.data.output.total;
 				});
 			},
-
+			handleCurrentChange(currentPage) {
+				findReport({
+					pageNo: this.currentPageSize,
+					page: currentPage,
+				}).then((res) => {
+					this.girdData = res.data.output.data;
+					this.currentPage = currentPage;
+					this.totalItems = res.data.output.total;
+				});
+			},
+			export_path(data, url) {
+				var array = new Array();
+				for(var a in data) {
+					array.push(a + "=" + data[a]);
+				}
+				var string = array.join("&");
+				var myUrl = this.getBaseURL() + url + string;
+				return myUrl;
+			},
 			downLoad(row) {
-				window.open("http://183.63.70.12:25000/api/wav/", '_blank');
+				var paramObj = {
+					eq_document_id: row.documentIdExt
+				}
+				window.open(this.export_path(paramObj, "/api/admin/admindocumentext/portal/export_document?"), "_blank");
 
 			},
+			upLoadData(row) {
+				var param={}
+				param['documentType'] = 1;
+				param['belongTo'] = row.teacherId;
+				param['uploadBy'] = getUserInfo().userId;
+				param['relateTo'] = row.paperId;
+				return param;
+			},
+			uploadError(response, file, fileList) {
+				this.$message({
+					showClose: true,
+					message: "上传失败，请重新上传",
+					type: 'error'
+				});
+			},
+			uploadSuccess(response, file, fileList) {
+				this.$message({
+					showClose: true,
+					message: "上传成功",
+					type: 'success'
+				});
+
+				findReport({
+					userId: getUserInfo().userId,
+					pageNo: '1',
+					pageSize: '30'
+				}).then((res) => {
+					this.girdData = res.data.output.data;
+					this.totalItems = res.data.output.total;
+					this.currentPage = 1;
+					this.currentPageSize = 30;
+				});
+			},
+			//			upload(row, event) {
+			//				debugger;
+			//				event.preventDefault();
+			//				let formData = new FormData();
+			//				formData.append('belongTo', row.id);
+			////				formData.append('createBy',getUserInfo().userId);
+			//				let config = {
+			//					headers: {
+			//						'Content-Type': 'multipart/form-data'
+			//					}
+			//				}
+			//				this.$http.post('/api/admin/admindocumentext/upload_document', formData, config).then(function(res) {
+			//					if(res.data.status == 0) {
+			//						this.$message({
+			//							showClose: true,
+			//							message: '录入成功！',
+			//							type: 'success'
+			//						});
+			//					}
+			//				})
+			//			},
 			deleteRow(index, row) {
 				this.$confirm('您确定要删除吗？', '提示', {
 					type: 'warning'
 				}).then(() => {
-					delUserGroup({
-						id: row.id
+					debugger;
+					deleteDocument({
+						ids: row.documentIdExt
 					}).then((res) => {
-						if(res.data.code == 1) {
+						if(res.data.status == 0) {
 							this.$message({
 								showClose: true,
 								message: '删除成功！',
 								type: 'success'
 							});
-							getUserGroupList({
-								rows: '30',
-								userGroupName: this.groupSearch
+							findReport({
+								userId: getUserInfo().userId,
+								pageNo: '1',
+								pageSize: '30'
 							}).then((res) => {
-								this.girdData = res.data.rows;
-								this.totalItems = res.data.total;
+								this.girdData = res.data.output.data;
+								this.totalItems = res.data.output.total;
 								this.currentPage = 1;
 								this.currentPageSize = 30;
 							});
 						} else {
 							this.$message({
 								showClose: true,
-								message: res.data.message,
+								message: "删除失败",
 								type: 'error'
 							});
 						}
@@ -161,19 +197,16 @@
 				});
 			}
 		},
+		mounted() {
+
+		},
 
 	}
 </script>
 
-<style>
+<style scoped="scoped">
 	.box {
 		height: 100%;
-	}
-	
-	.top {
-		width: 100%;
-		position: relative;
-		height: 80px;
 	}
 	
 	.button {

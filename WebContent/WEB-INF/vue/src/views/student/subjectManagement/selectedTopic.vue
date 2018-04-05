@@ -2,29 +2,34 @@
 	<div class="box">
 		<div class="top">
 			<div class="button">
-				<el-button type="text" icon="el-icon-plus" size="small " @click="pass">通过</el-button>
-				<el-button type="text" icon="el-icon-edit" size="small " @click="noPass">不通过</el-button>
+				<el-button type="text" icon="el-icon-check" size="small " @click="isPass('1')">通过</el-button>
+				<el-button type="text" icon="el-icon-close" size="small " @click="isPass('2')">不通过</el-button>
 				<el-button type="text" icon="el-icon-refresh" size="small" @click="refresh">刷新</el-button>
+				<el-button type="text" icon="el-icon-search" size="small" @click="search">搜索</el-button>
 			</div>
 			<el-form class="searchForm" :inline="true">
-				<el-form-item label="标题：" label-width="100px">
-					<el-input v-model="subjectSearch" id="subjectSearch" size="mini" style="width:160px;margin-right: 10px" clearable  prefix-icon="el-icon-search"></el-input>
+				<el-form-item label="论文题目：" label-width="100px">
+					<el-input v-model="subjectSearch" id="subjectSearch" size="mini" style="width:160px;margin-right: 10px" clearable prefix-icon="el-icon-search"></el-input>
 				</el-form-item>
 			</el-form>
 		</div>
 		<div class="block">
-			<el-table :data="tableData3" height="430" style="width: 100%" size="mini" sortable="true" border stripe @selection-change="selectItem" @row-click="selectByRow">
+			<el-table :data="girdData" height="430" style="width: 100%" size="mini" sortable="true" border stripe @selection-change="selectItem" @row-click="selectByRow">
 				<el-table-column type="selection" width="55" prop="id" align="center">
 				</el-table-column>
-				<el-table-column prop="title" label="论文题目" width="240" align="center">
+				<el-table-column prop="paperTitle" label="论文题目" width="240" align="center">
 				</el-table-column>
-				<el-table-column prop="teacher" label="教师姓名" width="100" align="center">
+				<el-table-column prop="createByName" label="教师姓名" width="100" align="center">
 				</el-table-column>
-				<el-table-column prop="details" label="题目描述" align="center">
+				<el-table-column prop="selectBy" label="已选学生" width="100" align="center">
 				</el-table-column>
-				<el-table-column prop="type" label="选题类型" width="100" align="center">
+				<el-table-column prop="paperDescribtion" label="题目描述" align="center">
 				</el-table-column>
-				<el-table-column prop="self" label="是否自拟" width="70" align="center">
+				<el-table-column prop="paperType" label="选题类型" width="100" align="center">
+				</el-table-column>
+				<el-table-column prop="isStudentCreate" label="是否自拟" width="70" align="center">
+				</el-table-column>
+				<el-table-column prop="selectStatus" label="状态" width="70" align="center">
 				</el-table-column>
 				<!--新增  审核中  审核通过  已发布-->
 			</el-table>
@@ -36,10 +41,12 @@
 
 <script>
 	import axios from 'axios'
+	import { findList, update } from '../../../../api/api.js'
 	export default {
 		data() {
 			return {
-				tableData3: [],
+				subjectSearch:'',
+				girdData: [],
 				currentPage: 1, //当前页码
 				totalItems: 0, //总数据
 				currentPageSize: 30, //当前页面显示条数
@@ -56,21 +63,13 @@
 			this.currentPageSize = 30;
 		},
 		methods: {
-			selectByRow(row){
-                this.$refs.multipleTable.clearSelection();
-                this.$refs.multipleTable.toggleRowSelection(this.girdData[(row.rownum_)-(this.currentPage-1)*this.currentPageSize-1])
-           },	
+			selectByRow(row) {
+				this.$refs.multipleTable.clearSelection();
+				this.$refs.multipleTable.toggleRowSelection(this.girdData[(row.rownum_) - (this.currentPage - 1) * this.currentPageSize - 1])
+			},
 			selectItem(selection) {
+				this.multipleSelection = selection;
 				this.selectItemsLength = selection.length;
-				for(var i = 0; i < selection.length; i++) {
-					if(i == 1) {
-						this.selectItemId = selection[0].id;
-						this.temp.name = selection[0].name;
-					} else  {
-						this.selectItemId = selection[0].ids;
-						this.temp.name = selection[0].names;
-					}
-				}
 			},
 			handleSizeChange(size) {
 				this.currentPage = 1;
@@ -95,13 +94,80 @@
 					this.totalItems = res.data.total;
 				});
 			},
-			/*通过*/
-			pass(){
-				
+			/*题目搜索*/
+			search() {
+				//				debugger;
+				var param = {
+					pageNo: '1',
+					pageSize: '30',
+					eq_status: '5'
+				}
+				if(this.subjectSearch) {
+					param['like_paper_title'] = this.subjectSearch;
+				}
+				findList(param).then((res) => {
+					this.girdData = res.data.output.data;
+					this.totalItems = res.data.output.total;
+					this.currentPage = 1;
+					this.currentPageSize = 30;
+				});
 			},
-			/*不通过*/
-			noPass(){
-				
+
+			/*通过*/
+			isPass(status) {
+				debugger;
+				if(this.selectItemsLength > 0) {
+					var ids = [];
+					var stat=[];
+					for(var i = 0; i < this.multipleSelection.length; i++) {
+						ids.push(this.multipleSelection[i].userPaperId);
+						if(stat.indexOf(this.multipleSelection[i].selectStatus) == -1) {
+							stat.push(this.multipleSelection[i].selectStatus);
+						}
+					}
+					var id = ids.join(',');
+					var stat = status.join(',');
+					if(stat == "未确认") {
+						update({
+							ids: id,
+							status: status
+						}).then((res) => {
+							if(res.data.status == 0) {
+								this.$message({
+									showClose: true,
+									message: '审核成功！',
+									type: 'success'
+								});
+								findList({
+									eq_status: '5',
+									pageNo: '1',
+									pageSize: '30'
+								}).then((res) => {
+									this.girdData = res.data.output.data;
+									this.totalItems = res.data.output.total;
+									this.currentPageSize = 30;
+									this.currentPage = 1;
+								});
+							} else {
+								this.$message({
+									showClose: true,
+									message: '审核失败！',
+									type: 'error'
+								});
+							}
+						});
+					} else {
+						this.$message({
+							showClose: true,
+							message: '该状态不能对数据进行此操作！'
+						});
+					}
+				} else {
+					this.$message({
+						showClose: true,
+						message: '请选择一条或多条数据提交！'
+					});
+				}
 			},
 			/*刷新*/
 			refresh() {
@@ -110,13 +176,15 @@
 					this.currentPageSize = 30;
 					this.currentPage = 1;
 				} else {
-					getUserGroupList({
-						rows: '30'
+					findList({
+						eq_status: '5',
+						pageNo: '1',
+						pageSize: '30'
 					}).then((res) => {
-						this.girdData = res.data.rows;
-						this.totalItems = res.data.total;
-						this.currentPage = 1;
+						this.girdData = res.data.output.data;
+						this.totalItems = res.data.output.total;
 						this.currentPageSize = 30;
+						this.currentPage = 1;
 					});
 				}
 			},
@@ -128,12 +196,16 @@
 			}
 		},
 		created: function() {
-			axios.get('http://localhost:8080/static/tableData3.json').then((res) => {
-				var result = res.data.tableData3
-				this.tableData3 = result;
-				console.log(result)
+			findList({
+				eq_status: '5',
+				pageNo: '1',
+				pageSize: '30'
+			}).then((res) => {
+				console.log(res);
+				this.girdData = res.data.output.data;
+				this.totalItems = res.data.output.total;
 			});
-		}
+		},
 
 	}
 </script>

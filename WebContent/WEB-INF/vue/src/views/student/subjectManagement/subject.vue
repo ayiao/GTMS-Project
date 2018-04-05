@@ -5,9 +5,16 @@
 				<el-button type="text" icon="el-icon-plus" size="small " @click="addSubject">添加</el-button>
 				<el-button type="text" icon="el-icon-edit" size="small " @click="editSubject">编辑</el-button>
 				<el-button type="text" icon="el-icon-delete" size="small " @click="deleteSubject">删除</el-button>
+				<el-button type="text" icon="el-icon-message" size="small" @click="submit">提交审核</el-button>
 				<el-button type="text" icon="el-icon-upload" size="small" @click="publish">发布</el-button>
 				<el-button type="text" icon="el-icon-refresh" size="small" @click="refresh">刷新</el-button>
+				<el-button type="text" icon="el-icon-search" size="small" @click="search">搜索</el-button>
 			</div>
+			<el-form class="searchForm" :inline="true">
+				<el-form-item label-width="100px">
+					<el-input v-model="subjectSearch" id="subjectSearch" size="mini" style="width:160px;margin-right: 10px" clearable prefix-icon="el-icon-search" placeholder="请搜索论文题目"></el-input>
+				</el-form-item>
+			</el-form>
 		</div>
 		<div class="block">
 			<el-table :data="girdData" height="430" style="width: 100%" size="mini" sortable="true" border stripe @selection-change="selectItem">
@@ -47,6 +54,14 @@
 						</el-option>
 					</el-select>
 				</el-form-item>
+				<el-form-item label="限选人数：" prop="num" label-width="120px">
+					<el-select v-model="subjectAdd.num" clearable placeholder="请选择限选人数">
+						<el-option label="1人" :value="1">
+						</el-option>
+						<el-option label="2人" :value="2">
+						</el-option>
+					</el-select>
+				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer" style="text-align: center; margin-top: -35px;">
 				<el-button type="primary" @click="confirmAdd('subjectAddForm')">确 定</el-button>
@@ -70,6 +85,14 @@
 						</el-option>
 					</el-select>
 				</el-form-item>
+				<el-form-item label="限选人数：" prop="num" label-width="120px">
+					<el-select v-model="subjectEdit.num" clearable placeholder="请选择限选人数">
+						<el-option label="1人" :value="1">
+						</el-option>
+						<el-option label="2人" :value="2">
+						</el-option>
+					</el-select>
+				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer" style="text-align: center; margin-top: -35px;">
 				<el-button type="primary" @click="confirmEdit('subjectEditForm')">确 定</el-button>
@@ -88,6 +111,8 @@
 				subjectSearch: "",
 				type: '设计类',
 				/*选题类型*/
+				num: '1人',
+				/*限定人数*/
 				girdData: [],
 				/*表格数据对象*/
 				currentPage: 1, //当前页码
@@ -102,12 +127,14 @@
 					teacher: '',
 					details: '',
 					type: '',
+					num: ''
 				},
 				subjectEdit: {
 					title: '',
 					teacher: '',
 					details: '',
 					type: '',
+					num: '',
 					paperId: ''
 				},
 				temp: {
@@ -115,6 +142,7 @@
 					teacher: '',
 					details: '',
 					type: '',
+					num: '',
 					status: '',
 					paperId: '',
 					selectItemId: ''
@@ -363,6 +391,24 @@
 					} else {
 						return false;
 					}
+				});
+			},
+
+			/*题目搜索*/
+			search() {
+				//				debugger;
+				var param = {
+					pageNo: '1',
+					pageSize: '30'
+				}
+				if(this.subjectSearch) {
+					param['like_paper_title'] = this.subjectSearch;
+				}
+				find(param).then((res) => {
+					this.girdData = res.data.output.data;
+					this.totalItems = res.data.output.total;
+					this.currentPage = 1;
+					this.currentPageSize = 30;
 				});
 			},
 			/*刷新*/
