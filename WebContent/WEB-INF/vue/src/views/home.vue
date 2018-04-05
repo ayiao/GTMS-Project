@@ -3,11 +3,10 @@
 	<el-container style="height:100vh;">
 		<!--顶栏容器-->
 		<el-header>
-			<el-dropdown>
+			<el-dropdown @command="handleCommand">
 				<i class="el-icon-setting" style="margin-right: 15px;color: #FFFFFF"></i>
 				<el-dropdown-menu slot="dropdown">
-					<el-dropdown-item>编辑</el-dropdown-item>
-					<el-dropdown-item>注销</el-dropdown-item>
+					<el-dropdown-item command="注销">注销</el-dropdown-item>
 				</el-dropdown-menu>
 			</el-dropdown>
 			<span>甄姬</span>
@@ -62,6 +61,11 @@
 
 		},
 		methods: {
+			handleCommand(command) {
+				this.$router.push({
+					path: '/'
+				});
+			},
 			removeTab(targetName) {
 				if(this.tabsInfo.length > 1) {
 					this.$store.commit('delTabs', targetName);

@@ -87,6 +87,7 @@
 						password: this.ruleForm.password
 					};
 					this.GLOBAL_Http(this.$http, "/api/user/login?", 'GET', param, function(data) {
+						setUserInfo(data.output.adminUser);
 						_this.$router.push({
 							name: 'home',
 							params:data

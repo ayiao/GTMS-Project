@@ -40,50 +40,12 @@
 					pageName = '';
 				for(let i = 0; i < tabsList.length; i++) {
 					if(curVal == tabsList[i].navIndex) {
-						curUrl = tabsList[i].viewsUrl;
-						pageName = tabsList[i].title;
+						this.$router.push({
+							path: tabsList[i].viewsUrl
+						});
 						break;
 					}
 				}
-				switch(pageName) {
-					case '欢迎使用':
-						this.$router.push({
-							path: '/home/mainPage'
-						});
-						break;
-					case '开题报告':
-						this.$router.push({
-							path: '/home/openingReport'
-						});
-						break;
-					case '毕业论文':
-						this.$router.push({
-							path: '/home/graduation'
-						});
-						break;
-					case '公告管理':
-						this.$router.push({
-							path: '/home/announcement'
-						});
-						break;
-					case '编辑发布':
-						this.$router.push({
-							path: '/home/subject'
-						});
-						break;
-					case '查看选题':
-						this.$router.push({
-							path: '/home/selectedTopic'
-						});
-						break;
-					case '毕设管理':
-						this.$router.push({
-							path: '/home/graduationManagement'
-						});
-						break;
-
-				}
-				//            this.$router.push({path:curUrl});
 			}
 		},
 		/*实时计算里关联了对象，那么当对象的某个值改变的时候，同时会出发实时计算*/
@@ -99,7 +61,6 @@
 				this.$store.commit('addTabs', obj);
 			},
 			noChildClick(dataindex, menuName, url) {
-				debugger;
 				this.activeIndex = dataindex;
 				let obj = {
 					title: menuName,
@@ -122,10 +83,8 @@
 			menuList() {
 				
 				JSON.stringify(this.$route.params)	;
-				debugger;
 				this.menus=[];
 				this.tabsInfo=[];
-				
 				var menuList=this.$route.params.output.roleMenuExts;
 				for(var i=0;i<menuList.length;i++){
 					var menuData=menuList[i];

@@ -26,26 +26,36 @@ new Vue({
 	}
 })
 
+global.getUserInfo = function() {
+	return Vue.prototype.UserInfo;
+}
 
-Vue.prototype.getBaseURL=function(){
-	return 'http://192.168.16.103:8080';
+global.setUserInfo = function(UserInfo) {
+	Vue.prototype.UserInfo = UserInfo;
+}
+
+Vue.prototype.getBaseURL = function() {
+	return 'http://35091590.all123.net:8080';
+	//	return 'http://112.74.191.64:8080/gtms';
+
+	//		return 'http://localhost:8080';
 }
 
 Vue.prototype.GLOBAL_Http = function($http, url, method, data, successCallBack, errorCallBack) {
 	var myUrl = "";
 	myUrl = this.getBaseURL() + url;
 	return $.ajax({
-			headers:{
-				'Authorization':'Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqd3QiLCJpYXQiOjE1MjEzMzc0OTYsInN1YiI6IntcInJvbGVpZFwiOlwiLFwiLFwidXNlcmlkXCI6MzEsXCJwbGF0Zm9ybVwiOlwiMSwyLDMsNVwiLFwidXNlcm5hbWVcIjpcIkJWTjAwMVwifSIsImV4cCI6MTUyMjIwMTQ5Nn0.-6husDsi6dRRwxINkS_GUwgp54HcvMN_IXENbLdBcew',
-				'Accept-Language':'en-US',
-				'Content-Type':'application/json; charset=UTF-8'
+			headers: {
+				'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqd3QiLCJpYXQiOjE1MjIyNDU2OTQsInN1YiI6IntcInJvbGVpZFwiOlwiLCwsLCxcIixcInVzZXJpZFwiOjMxLFwicGxhdGZvcm1cIjpcIjEsMiw1LDlcIixcInVzZXJuYW1lXCI6XCJCVk4wMDFcIn0iLCJleHAiOjE1MjMxMDk2OTR9.ChE_a5sJxmRGHo6rcEJl181kyS0tV9u9Y9051mbi_M0',
+				'Accept-Language': 'en-US',
+				'Content-Type': 'application/json; charset=UTF-8'
 			},
 			method: method,
 			url: myUrl,
 			data: data,
 			async: false,
-			crossDomain:true,
-			dataType:'json'
+			crossDomain: true,
+			dataType: 'json'
 		})
 		.success(function(data, status, headers, config) {
 			successCallBack(data);

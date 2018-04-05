@@ -26,7 +26,7 @@
 				</el-table-column>
 			</el-table>
 		</div>
-		<el-dialog title="发送开题报告" :visible.sync="show.submit" size="mini" :close-on-click-modal="false">
+		<!--<el-dialog title="发送开题报告" :visible.sync="show.submit" size="mini" :close-on-click-modal="false">
 			<el-form :model="submitTo" ref="submitForm">
 				<el-form-item label="院系导师：" prop="teacher" label-width="120px">
 					<el-select v-model="submitTo.teacher" clearable placeholder="请选择发送院系导师">
@@ -41,7 +41,7 @@
 				<el-button type="primary" @click="submitTo('submitForm')">确 定</el-button>
 				<el-button @click="show.submit= false">取 消</el-button>
 			</div>
-		</el-dialog>
+		</el-dialog>-->
 	</div>
 </template>
 

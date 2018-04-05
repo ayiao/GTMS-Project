@@ -17,20 +17,18 @@
 			</el-form>
 		</div>
 		<div class="block">
-			<el-table :data="tableData3" height="430" style="width: 100%" size="mini" sortable="true" border stripe @selection-change="selectItem" @row-click="selectByRow">
+			<el-table :data="girdData" height="430" style="width: 100%" size="mini" sortable="true" border stripe @selection-change="selectItem">
 				<el-table-column type="selection" width="55" prop="id" align="center">
 				</el-table-column>
-				<el-table-column prop="title" label="论文题目" width="240" align="center">
+				<el-table-column prop="paperTitle" label="论文题目" width="240" align="center">
 				</el-table-column>
-				<el-table-column prop="teacher" label="教师姓名" width="100" align="center">
+				<el-table-column prop="teacherName" label="教师姓名" width="100" align="center">
 				</el-table-column>
-				<el-table-column prop="details" label="题目描述" align="center">
+				<el-table-column prop="paperDescribtion" label="题目描述" align="center">
 				</el-table-column>
-				<el-table-column prop="type" label="选题类型" width="100" align="center">
+				<el-table-column prop="paperType" label="选题类型" width="100" align="center">
 				</el-table-column>
-				<el-table-column prop="num" label="限选人数" width="70" align="center">
-				</el-table-column>
-				<el-table-column prop="self" label="是否自拟" width="70" align="center">
+				<el-table-column prop="limitAccount" label="限选人数" width="70" align="center">
 				</el-table-column>
 				<el-table-column prop="status" label="状态" width="70" align="center">
 				</el-table-column>
@@ -44,9 +42,6 @@
 			<el-form :model="subjectAdd" ref="subjectAddForm">
 				<el-form-item label="论文题目：" prop="title" label-width="120px" :rules="[{ required: true, message: '请输入论文题目' }]">
 					<el-input v-model="subjectAdd.title" auto-complete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="教师姓名：" prop="teacher" label-width="120px" :rules="[{ required: true, message: '请输入教师姓名' }]">
-					<el-input v-model="subjectAdd.teacher" auto-complete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="题目描述：" prop="details" label-width="120px" :rules="[{ required: true, message: '请输入题目描述' }]">
 					<el-input v-model="subjectAdd.details" auto-complete="off" type="textarea" :rows="3"></el-input>
@@ -79,11 +74,8 @@
 				<el-form-item label="论文题目：" prop="title" label-width="120px" :rules="[{ required: true, message: '请输入论文题目' }]">
 					<el-input v-model="subjectEdit.title" auto-complete="off"></el-input>
 				</el-form-item>
-				<el-form-item label="教师姓名：" prop="teacher" label-width="120px" :rules="[{ required: true, message: '请输入教师姓名' }]">
-					<el-input v-model="subjectEdit.teacher" auto-complete="off"></el-input>
-				</el-form-item>
 				<el-form-item label="题目描述：" prop="details" label-width="120px" :rules="[{ required: true, message: '请输入题目描述' }]">
-					<el-input v-model="subjectEdit.details" auto-complete="off" type="textarea" :rows="3"></el-input>
+					<el-input v-model="subjectEdit.details" auto-complete="off" type="textarea" :pageNo="3"></el-input>
 				</el-form-item>
 				<el-form-item label="选题类型：" prop="type" label-width="120px">
 					<el-select v-model="subjectEdit.type" clearable placeholder="请选择选题类型">
@@ -107,44 +99,12 @@
 				<el-button @click="show.edit= false">取 消</el-button>
 			</div>
 		</el-dialog>
-		<el-dialog title="提交审核" :visible.sync="show.submit" size="mini" :close-on-click-modal="false">
-			<el-form :model="submitTo" ref="submitForm">
-				<el-form-item label="审核院系：" prop="college" label-width="120px">
-					<el-select v-model="submitTo.college" clearable placeholder="请选择审核人">
-						<el-option label="信息科学技术学院" :value="1">
-						</el-option>
-						<el-option label="西方语言学院" :value="2">
-						</el-option>
-					</el-select>
-				</el-form-item>
-			</el-form>
-			<div slot="footer" class="dialog-footer" style="text-align: center; margin-top: -35px;">
-				<el-button type="primary" @click="confirSubmit('submitForm')">确 定</el-button>
-				<el-button @click="show.submit= false">取 消</el-button>
-			</div>
-		</el-dialog>
-		<el-dialog title="发布" :visible.sync="show.publish" size="mini" :close-on-click-modal="false">
-			<el-form :model="publishTo" ref="publishForm">
-				<el-form-item label="发布院系：" prop="college" label-width="120px">
-					<el-select v-model="publishTo.college" clearable placeholder="请选择发布院系">
-						<el-option label="信息科学技术学院" :value="1">
-						</el-option>
-						<el-option label="西方语言学院" :value="2">
-						</el-option>
-					</el-select>
-				</el-form-item>
-			</el-form>
-			<div slot="footer" class="dialog-footer" style="text-align: center; margin-top: -35px;">
-				<el-button type="primary" @click="confirPublish('publishForm')">确 定</el-button>
-				<el-button @click="show.publish= false">取 消</el-button>
-			</div>
-		</el-dialog>
 	</div>
 </template>
 
 <script>
 	import axios from 'axios'
-	import {addSubjectInfo} from '../../../../api/api.js'
+	import { addSubjectInfo, find, updatePaper, deletePaper, updatePaperList } from '../../../../api/api.js'
 	export default {
 		data() {
 			return {
@@ -153,16 +113,14 @@
 				/*选题类型*/
 				num: '1人',
 				/*限定人数*/
-				tableData3: [],
+				girdData: [],
 				/*表格数据对象*/
 				currentPage: 1, //当前页码
 				totalItems: 0, //总数据
 				currentPageSize: 30, //当前页面显示条数
 				show: { /*添加选题内容*/
 					add: false,
-					edit: false,
-					submit: false,
-					publish:false
+					edit: false
 				},
 				subjectAdd: {
 					title: '',
@@ -176,7 +134,8 @@
 					teacher: '',
 					details: '',
 					type: '',
-					num: ''
+					num: '',
+					paperId: ''
 				},
 				temp: {
 					title: '',
@@ -184,13 +143,9 @@
 					details: '',
 					type: '',
 					num: '',
-					status: ''
-				},
-				submitTo: {
-					college: '',
-				},
-				publishTo: {
-					college: '',
+					status: '',
+					paperId: '',
+					selectItemId: ''
 				},
 				outMemberDialog: {
 					userName: '',
@@ -214,12 +169,13 @@
 			}
 		},
 		created: function() {
-			 /*getUserGroupList({rows:'30'}).then((res) => {
-                this.girdData=res.data.rows;
-                this.totalItems=res.data.total;
-            });*/
-			axios.get('http://localhost:8080/static/tableData3.json').then((res) => {
-				this.tableData3 = res.data.tableData3;
+			find({
+				pageNo: '1',
+				pageSize: '30'
+			}).then((res) => {
+				console.log(res);
+				this.girdData = res.data.output.data;
+				this.totalItems = res.data.output.total;
 			});
 		},
 		activated() {
@@ -227,46 +183,96 @@
 			this.currentPageSize = 30;
 		},
 		methods: {
+			submit() {
+				if(this.selectItemsLength > 0) {
+					var ids = [];
+					var status = [];
+					for(var i = 0; i < this.multipleSelection.length; i++) {
+						ids.push(this.multipleSelection[i].paperId);
+						if(status.indexOf(this.multipleSelection[i].status) == -1) {
+							status.push(this.multipleSelection[i].status);
+						}
+					}
+					var id = ids.join(',');
+					var stat = status.join(',');
+					if(stat == "新增" || stat == "更新") {
+						updatePaperList({
+							ids: id,
+							status: '3'
+						}).then((res) => {
+							if(res.data.status == 0) {
+								this.$message({
+									showClose: true,
+									message: '提交审核成功！',
+									type: 'success'
+								});
+								find({
+									pageNo: '1',
+									pageSize: '30'
+								}).then((res) => {
+									this.girdData = res.data.output.data;
+									this.totalItems = res.data.output.total;
+									this.currentPageSize = 30;
+									this.currentPage = 1;
+								});
+							} else {
+								this.$message({
+									showClose: true,
+									message: '提交审核失败！',
+									type: 'error'
+								});
+							}
+						});
+					} else {
+						this.$message({
+							showClose: true,
+							message: '该状态不能对数据进行此操作！'
+						});
+					}
+				} else {
+					this.$message({
+						showClose: true,
+						message: '请选择一条或多条数据提交！'
+					});
+				}
+			},
 			handleCommand(command) {
 				this.$message('click on item ' + command);
 			},
-			selectByRow(row) {
-				this.$refs.multipleTable.clearSelection();
-				this.$refs.multipleTable.toggleRowSelection(this.girdData[(row.rownum_) - (this.currentPage - 1) * this.currentPageSize - 1])
-			},
 			selectItem(selection) {
+				this.multipleSelection = selection;
 				this.selectItemsLength = selection.length;
 				for(var i = 0; i < selection.length; i++) {
-					this.selectItemId = selection[0].id;
-					this.temp.title = selection[0].title;
-					this.temp.teacher = selection[0].teacher;
-					this.temp.type = selection[0].type;
-					this.temp.details = selection[0].details;
-					this.temp.num = selection[0].num;
+					this.temp.selectItemId = selection[0].paperId;
+					this.temp.title = selection[0].paperTitle;
+					this.temp.teacher = selection[0].teacherName;
+					this.temp.type = selection[0].paperType;
+					this.temp.details = selection[0].paperDescribtion;
+					this.temp.num = selection[0].limitAccount;
 					this.temp.status = selection[0].status;
 				}
 			},
 			handleSizeChange(size) {
 				this.currentPage = 1;
-				getUserGroupList({
-					rows: size,
+				find({
+					pageNo: size,
 					page: this.currentPage,
 					userGroupName: this.subjectSearch
 				}).then((res) => {
-					this.girdData = res.data.rows;
+					this.girdData = res.data.output.data;
 					this.currentPageSize = size;
-					this.totalItems = res.data.total;
+					this.totalItems = res.data.output.total;
 				});
 			},
 			handleCurrentChange(currentPage) {
-				getUserGroupList({
-					rows: this.currentPageSize,
+				find({
+					pageNo: this.currentPageSize,
 					page: currentPage,
 					userGroupName: this.subjectSearch
 				}).then((res) => {
-					this.girdData = res.data.rows;
+					this.girdData = res.data.output.data;
 					this.currentPage = currentPage;
-					this.totalItems = res.data.total;
+					this.totalItems = res.data.output.total;
 				});
 			},
 			/*添加题目*/
@@ -281,10 +287,11 @@
 					if(valid) {
 						addSubjectInfo({
 							paperTitle: this.subjectAdd.title,
-							createBy: this.subjectAdd.teacher,
+							teacherName: getUserInfo().userId,
 							paperDescribtion: this.subjectAdd.details,
 							paperType: this.subjectAdd.type,
 							limitAccount: this.subjectAdd.num,
+							status: "1",
 						}).then((res) => {
 							if(res.data.status == 0) {
 								this.$message({
@@ -292,15 +299,14 @@
 									message: '录入成功！',
 									type: 'success'
 								});
-								getUserGroupList({
-									rows: '30',
-									userGroupName: this.subjectSearch
+								find({
+									pageNo: '1',
+									pageSize: '30'
 								}).then((res) => {
-									this.girdData = res.data.rows;
-									this.totalItems = res.data.total;
+									this.girdData = res.data.output.data;
+									this.totalItems = res.data.output.total;
 									this.currentPageSize = 30;
 									this.currentPage = 1;
-									this.temp.status="新增";
 								});
 							} else {
 								this.$message({
@@ -319,7 +325,6 @@
 			/*编辑题目消息*/
 			editSubject() {
 				if(this.selectItemsLength == 1) {
-					debugger;
 					if(this.temp.status == "新增") {
 						this.show.edit = true;
 						this.subjectEdit.title = this.temp.title;
@@ -327,6 +332,7 @@
 						this.subjectEdit.details = this.temp.details;
 						this.subjectEdit.type = this.temp.type;
 						this.subjectEdit.num = this.temp.num;
+						this.subjectEdit.paperId = this.temp.paperId;
 					} else {
 						this.$message({
 							showClose: true,
@@ -342,28 +348,34 @@
 				}
 			},
 			confirmEdit(formName) {
-				this.$refs[formName].validsubjectEditate((valid) => {
+				this.$refs[formName].validate((valid) => {
 					if(valid) {
-						editUserGroup({
-							id: this.selectItemId,
+						if(this.subjectEdit.type == "设计类") {
+							this.subjectEdit.type = "1";
+						} else {
+							this.subjectEdit.type = "2";
+						}
+						updatePaper({
+							paperId: this.temp.selectItemId,
 							paperTitle: this.subjectEdit.title,
-							createBy: this.subjectEdit.teacher,
+							teacherName: getUserInfo().userId,
 							paperDescribtion: this.subjectEdit.details,
 							paperType: this.subjectEdit.type,
 							limitAccount: this.subjectEdit.num,
+							status: '2'
 						}).then((res) => {
-							if(res.data.status == 1) {
+							if(res.data.status == 0) {
 								this.$message({
 									showClose: true,
 									message: '编辑成功！',
 									type: 'success'
 								});
-								getUserGroupList({
-									rows: '30',
-									userGroupName: this.subjectSearch
+								find({
+									pageNo: '1',
+									pageSize: '30'
 								}).then((res) => {
-									this.girdData = res.data.rows;
-									this.totalItems = res.data.total;
+									this.girdData = res.data.output.data;
+									this.totalItems = res.data.output.total;
 									this.currentPageSize = 30;
 									this.currentPage = 1;
 								});
@@ -384,13 +396,17 @@
 
 			/*题目搜索*/
 			search() {
-				getUserGroupList({
-					subjectName: this.subjectSearch,
-					rows: '30',
-					page: '1'
-				}).then((res) => {
-					this.girdData = res.data.rows;
-					this.totalItems = res.data.total;
+				//				debugger;
+				var param = {
+					pageNo: '1',
+					pageSize: '30'
+				}
+				if(this.subjectSearch) {
+					param['like_paper_title'] = this.subjectSearch;
+				}
+				find(param).then((res) => {
+					this.girdData = res.data.output.data;
+					this.totalItems = res.data.output.total;
 					this.currentPage = 1;
 					this.currentPageSize = 30;
 				});
@@ -402,11 +418,12 @@
 					this.currentPageSize = 30;
 					this.currentPage = 1;
 				} else {
-					getUserGroupList({
-						rows: '30'
+					find({
+						pageNo: '1',
+						pageSize: '30'
 					}).then((res) => {
-						this.girdData = res.data.rows;
-						this.totalItems = res.data.total;
+						this.girdData = res.data.output.data;
+						this.totalItems = res.data.output.total;
 						this.currentPage = 1;
 						this.currentPageSize = 30;
 					});
@@ -415,26 +432,32 @@
 			/*删除*/
 			deleteSubject() {
 				if(this.selectItemsLength > 0) {
+					var ids = [];
+					for(var i = 0; i < this.multipleSelection.length; i++) {
+						ids.push(this.multipleSelection[i].paperId);
+					}
+					var id = ids.join(',');
+					console.log(id);
 					this.$confirm('您确定要删除吗？', '提示', {
 						confirmButtonText: '确定',
 						cancelButtonText: '取消',
 						type: 'warning'
 					}).then(() => {
-						delUserGroup({
-							id: this.selectItemId
+						deletePaper({
+							ids: id
 						}).then((res) => {
-							if(res.data.code == 1) {
+							if(res.data.status == 0) {
 								this.$message({
 									showClose: true,
 									message: '删除成功！',
 									type: 'success'
 								});
-								getUserGroupList({
-									rows: '30',
-									userGroupName: this.subjectSearch
+								find({
+									pageNo: '1',
+									pageSize: '30'
 								}).then((res) => {
-									this.girdData = res.data.rows;
-									this.totalItems = res.data.total;
+									this.girdData = res.data.output.data;
+									this.totalItems = res.data.output.total;
 									this.currentPage = 1;
 									this.currentPageSize = 30;
 								});
@@ -459,65 +482,49 @@
 					});
 				}
 			},
-			/*提交审核*/
-			submit() {
-				if(this.selectItemsLength == 1) {
-					if(this.temp.status == "新增") {
-						this.show.submit = true;
-					} else {
-						this.$message({
-							showClose: true,
-							message: '该状态不能对数据进行此操作！'
-						});
-					}
-				} else {
-					this.$message({
-						showClose: true,
-						message: '请选择一条或多条数据提交！'
-					});
-				}
-			},
-			confirSubmit(formName) {
-				this.$refs[formName].validate((valid) => {
-					if(valid) {
-						addUserGroup({
-							id: this.selectItemId,
-							createBy: this.submitTo.teacher,
-						}).then((res) => {
-							if(res.data.status == 0) {
-								this.$message({
-									showClose: true,
-									message: '录入成功！',
-									type: 'success'
-								});
-								getUserGroupList({
-									rows: '30',
-									userGroupName: this.subjectSearch
-								}).then((res) => {
-									this.girdData = res.data.rows;
-									this.totalItems = res.data.total;
-									this.currentPageSize = 30;
-									this.currentPage = 1;
-									this.temp.status="审核中";
-								});
-							} else {
-								this.$message({
-									showClose: true,
-									message: '录入失败！',
-									type: 'error'
-								});
-							}
-						});
-						this.show.add = false;
-					} else {
-						return false;
-					}
-				});
-			},
+			/*发布*/
 			publish() {
-				if(this.selectItemsLength == 1) {
-					if(this.temp.status == "审核通过") {
-						this.show.publish = true;
+				if(this.selectItemsLength > 0) {
+					var ids = [];
+					var status = [];
+					debugger;
+					for(var i = 0; i < this.multipleSelection.length; i++) {
+						ids.push(this.multipleSelection[i].paperId);
+						if(status.indexOf(this.multipleSelection[i].status) == -1) {
+							status.push(this.multipleSelection[i].status);
+						}
+					}
+					var id = ids.join(',');
+					var stat = status.join(',');
+					
+					if(stat == "审核通过") {
+						updatePaperList({
+							ids: id,
+							status: '5'
+						}).then((res) => {
+							if(res.data.status == 0) {
+								this.$message({
+									showClose: true,
+									message: '发布成功！',
+									type: 'success'
+								});
+								find({
+									pageNo: '1',
+									pageSize: '30'
+								}).then((res) => {
+									this.girdData = res.data.output.data;
+									this.totalItems = res.data.output.total;
+									this.currentPageSize = 30;
+									this.currentPage = 1;
+								});
+							} else {
+								this.$message({
+									showClose: true,
+									message: '发布失败！',
+									type: 'error'
+								});
+							}
+						});
 					} else {
 						this.$message({
 							showClose: true,
@@ -531,43 +538,6 @@
 					});
 				}
 			},
-			confirPublish(formName){
-				this.$refs[formName].validate((valid) => {
-					if(valid) {
-						addUserGroup({
-							id: this.selectItemId,
-							createBy: this.publishTo.teacher,
-						}).then((res) => {
-							if(res.data.status == 0) {
-								this.$message({
-									showClose: true,
-									message: '录入成功！',
-									type: 'success'
-								});
-								getUserGroupList({
-									rows: '30',
-									userGroupName: this.subjectSearch
-								}).then((res) => {
-									this.girdData = res.data.rows;
-									this.totalItems = res.data.total;
-									this.currentPageSize = 30;
-									this.currentPage = 1;
-									this.temp.status="已发布";
-								});
-							} else {
-								this.$message({
-									showClose: true,
-									message: '录入失败！',
-									type: 'error'
-								});
-							}
-						});
-						this.show.add = false;
-					} else {
-						return false;
-					}
-				});
-			}
 
 		},
 		computed: {
